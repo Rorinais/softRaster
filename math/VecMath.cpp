@@ -254,7 +254,6 @@ public:
 	Derived& derived() { return static_cast<Derived&>(*this); }
 	const Derived& derived() const { return static_cast<const Derived&>(*this); }
 
-	//=== 基础运算符 ===//
 	Derived operator+(const Derived& other) const {
 		Derived result;
 		for (uint32_t i = 0; i < Rows; ++i) {
@@ -263,7 +262,6 @@ public:
 		return result;
 	}
 
-	// 矩阵减法
 	Derived operator-(const Derived& other) const {
 		Derived result;
 		for (uint32_t i = 0; i < Rows; ++i) {
@@ -272,7 +270,6 @@ public:
 		return result;
 	}
 
-	// 标量乘法
 	Derived operator*(T scalar) const {
 		Derived result;
 		for (uint32_t i = 0; i < Rows; ++i) {
@@ -281,7 +278,6 @@ public:
 		return result;
 	}
 
-	// 转置矩阵
 	Derived transpose() const {
 		Derived transposed;
 		for (uint32_t i = 0; i < Rows; ++i) {
@@ -292,7 +288,6 @@ public:
 		return transposed;
 	}
 
-	// 归一化
 	Derived normalize() const {
 		Derived result;
 		for (uint32_t i = 0; i < Rows; ++i) {
@@ -311,7 +306,6 @@ public:
 		return result;
 	}
 
-	//=== 静态方法 ===//
 	static Derived identity()
 	{
 		static_assert(Rows == Cols, "Identity matrix must be square");
@@ -344,9 +338,7 @@ public:
 template <class T, uint32_t Rows, uint32_t Cols>
 class Matrix : public MatrixBase<Matrix<T, Rows, Cols>, T, Rows, Cols> {
 public:
-	//=== 构造函数 ===//
 	Matrix() {
-		// 初始化为零矩阵
 		for (uint32_t row = 0; row < Rows; ++row) {
 			mMatrix[row] = Vector<T, Cols>(); // 每行有Cols列
 		}
@@ -358,7 +350,6 @@ public:
 		}
 	}
 
-	// 可变参数模板构造函数（排除拷贝场景）
 	template <
 		typename... Vectors,
 		typename = std::enable_if_t<(!std::is_same_v<std::decay_t<Vectors>, Matrix> && ...)>>
@@ -368,7 +359,6 @@ public:
 		initMatrix(0, try_create_vector(std::forward<Vectors>(vectors))...);
 	}
 
-	// 初始化列表构造
 	Matrix(std::initializer_list<std::initializer_list<T>> init) {
 		if (init.size() != Rows) {
 			throw std::invalid_argument("Row count mismatch");
@@ -382,15 +372,13 @@ public:
 		}
 	}
 
-	//拷贝构造
 	Matrix(const Matrix<T, Rows, Cols>& matrix) {
 		for (int i = 0; i < Rows; ++i)
 		{
 			mMatrix[i] = matrix[i];
 		}
 	}
-
-	//移动构造
+	
 	Matrix(Matrix<T, Rows, Cols>&& matrix) noexcept {
 		for (uint32_t i = 0; i < Rows; ++i) {
 			mMatrix[i] = std::move(matrix[i]);
@@ -432,7 +420,6 @@ public:
 		return col;
 	}
 
-	//=== 运算符重载 ===//
 	Matrix& operator=(const Matrix& other) noexcept {
 		if (this != &other) {
 			for (uint32_t i = 0; i < Rows; ++i) { // 循环Rows次
@@ -463,7 +450,6 @@ public:
 	auto end() const { return mMatrix.end(); }
 
 private:
-	//=== 辅助函数 ===//
 	template <typename U>
 	Vector<T, Cols> try_create_vector(U&& arg) {
 		static_assert(
@@ -488,7 +474,7 @@ private:
 	Vector<Vector<T, Cols>, Rows> mMatrix;
 };
 
-// 矩阵乘法（通用实现）
+// 矩阵乘法
 template <typename T, uint32_t Rows, uint32_t N, uint32_t Cols>
 Matrix<T, Rows, Cols> operator*(
 	const Matrix<T, Rows, N>& lhs,
